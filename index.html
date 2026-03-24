@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestão da Qualidade Telecom - RJO</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* ── DARK: Preto · Amarelo · Branco ── */
+  --bg:#000000;--bg2:#0e0e0e;--bg3:#181818;--bg4:#222222;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.16);
+  --accent:#f5d000;--accent2:#d4b400;--accent3:rgba(245,208,0,0.13);
+  --text:#ffffff;--text2:#b0b0b0;--text3:#555555;
+  /* Status em dark: verde pastel / vermelho suave / amarelo */
+  --green:#a3e635;--green2:rgba(163,230,53,0.13);
+  --red:#ff8585;--red2:rgba(255,133,133,0.13);
+  --amber:#f5d000;--amber2:rgba(245,208,0,0.13);
+  --sidebar:244px;--r:10px;--r2:14px;
+  --tr:all 0.2s cubic-bezier(.4,0,.2,1);
+}
+body.light{
+  /* ── LIGHT: Branco · Amarelo · Preto ── */
+  --bg:#ffffff;--bg2:#fafafa;--bg3:#f0f0f0;--bg4:#e4e4e4;
+  --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.17);
+  --accent:#c8a000;--accent2:#a88800;--accent3:rgba(200,160,0,0.12);
+  --text:#000000;--text2:#444444;--text3:#999999;
+  /* Status em light: verde escuro / vermelho / âmbar */
+  --green:#15803d;--green2:rgba(21,128,61,0.10);
+  --red:#b91c1c;--red2:rgba(185,28,28,0.10);
+  --amber:#92400e;--amber2:rgba(146,64,14,0.10);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* ── SIDEBAR ── */
+#sidebar{position:fixed;top:0;left:0;width:var(--sidebar);height:100vh;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;transition:var(--tr)}
+.logo-wrap{padding:22px 18px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.logo-icon{width:34px;height:34px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-icon svg{width:20px;height:20px}
+.logo-text{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.3px}
+.logo-sub{font-size:10px;color:var(--text3);font-weight:500;letter-spacing:.5px;text-transform:uppercase}
+.nav{padding:14px 10px;flex:1;overflow-y:auto}
+.nav-section{font-size:10px;color:var(--text3);font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:10px 8px 5px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;cursor:pointer;transition:var(--tr);color:var(--text2);font-size:13px;font-weight:500;margin-bottom:2px;white-space:nowrap}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:var(--accent3);color:var(--accent);border-left:3px solid var(--accent);padding-left:7px}
+.nav-item svg{width:16px;height:16px;flex-shrink:0;opacity:.7}
+.nav-item.active svg{opacity:1}
+.nav-badge{margin-left:auto;font-size:10px;background:var(--accent3);color:var(--accent);padding:2px 7px;border-radius:20px;font-weight:600}
+.nav-badge.red{background:var(--red2);color:var(--red)}
+.sidebar-footer{padding:14px 10px;border-top:1px solid var(--border)}
+.user-card{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--r);background:var(--bg3)}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#000;flex-shrink:0}
+.user-name{font-size:12px;font-weight:600}
+.user-role{font-size:10px;color:var(--text3)}
+.theme-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:7px;padding:7px 12px;border-radius:8px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:12px;font-weight:500;cursor:pointer;margin-bottom:8px;transition:var(--tr)}
+.theme-btn:hover{background:var(--bg4);color:var(--text)}
+.theme-btn svg{width:14px;height:14px}
+
+/* ── MAIN ── */
+#main{margin-left:var(--sidebar);min-height:100vh;display:flex;flex-direction:column}
+#topbar{position:sticky;top:0;z-index:50;background:var(--bg2);border-bottom:1px solid var(--border);padding:0 26px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.topbar-left{display:flex;align-items:center;gap:14px}
+.page-title{font-size:14px;font-weight:600}
+.breadcrumb{font-size:11px;color:var(--text3)}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.tb-btn{display:flex;align-items:center;gap:6px;padding:6px 13px;border-radius:8px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:12px;font-weight:500;cursor:pointer;transition:var(--tr)}
+.tb-btn:hover{background:var(--bg4);color:var(--text)}
+.tb-btn.primary{background:var(--accent);border-color:var(--accent);color:#000;font-weight:700}
+.tb-btn.primary:hover{background:var(--accent2)}
+.tb-btn svg{width:13px;height:13px}
+.menu-toggle{display:none;align-items:center;justify-content:center;width:30px;height:30px;border-radius:7px;background:var(--bg3);border:1px solid var(--border);cursor:pointer}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
+.overlay.open{display:block}
+
+/* ── CONTENT ── */
+#content{padding:26px;flex:1}
+.page{display:none}
+.page.active{display:block;animation:fadeIn .22s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── LAYOUT ── */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+
+/* ── CARDS ── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:18px;transition:var(--tr)}
+.card:hover{border-color:rgba(245,208,0,0.2)}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-title{font-size:12.5px;font-weight:600;color:var(--text2)}
+.card-action{font-size:11px;color:var(--accent);cursor:pointer;font-weight:600}
+
+/* ── KPIs ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.kpi{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:16px 18px;position:relative;overflow:hidden;transition:var(--tr);cursor:default}
+.kpi:hover{border-color:var(--border2);transform:translateY(-1px)}
+.kpi-label{font-size:11px;color:var(--text3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:7px}
+.kpi-value{font-size:26px;font-weight:700;letter-spacing:-1px;line-height:1;margin-bottom:5px}
+.kpi-sub{font-size:11.5px;display:flex;align-items:center;gap:3px}
+.kpi-sub.up{color:var(--green)}.kpi-sub.down{color:var(--red)}.kpi-sub.neutral{color:var(--text3)}
+.kpi-icon{position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center}
+.kpi-icon svg{width:17px;height:17px}
+.kpi.accent{border-color:rgba(245,208,0,.35);border-top:2px solid var(--accent)}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:600}
+.badge.green{background:var(--green2);color:var(--green)}
+.badge.red{background:var(--red2);color:var(--red)}
+.badge.amber{background:var(--amber2);color:var(--amber)}
+.badge.accent{background:var(--accent3);color:var(--accent)}
+.badge.gray{background:rgba(255,255,255,.07);color:var(--text2)}
+
+/* ── TABLE ── */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{text-align:left;padding:9px 12px;color:var(--text3);font-weight:600;font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle}
+td.mono{font-family:'DM Mono',monospace;font-size:11.5px;color:var(--text)}
+tr:hover td{background:var(--bg3)}
+tr:last-child td{border-bottom:none}
+
+/* ── PROGRESS ── */
+.progress-bar{height:5px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;transition:width .9s cubic-bezier(.4,0,.2,1)}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:2px;margin-bottom:18px;background:var(--bg3);border-radius:10px;padding:4px;width:fit-content}
+.tab{padding:6px 15px;border-radius:7px;font-size:12.5px;font-weight:500;cursor:pointer;color:var(--text2);transition:var(--tr)}
+.tab.active{background:var(--bg);color:var(--accent);font-weight:600;box-shadow:inset 0 -2px 0 var(--accent)}
+
+/* ── FILTER BAR ── */
+.filter-bar{display:flex;align-items:center;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.filter-select{background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:6px 11px;border-radius:8px;font-size:12px;cursor:pointer;outline:none;font-family:'DM Sans',sans-serif;transition:var(--tr)}
+.filter-select:hover{border-color:var(--border2)}
+.filter-select option{background:var(--bg3);color:var(--text)}
+.filter-label{font-size:11.5px;color:var(--text3);white-space:nowrap}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:none;align-items:center;justify-content:center;padding:18px}
+.modal-bg.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;width:100%;max-width:680px;max-height:92vh;overflow-y:auto}
+.modal.wide{max-width:900px}
+.modal-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:15px;font-weight:700}
+.modal-close{width:26px;height:26px;border-radius:6px;background:var(--bg3);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:14px;transition:var(--tr)}.modal-close:hover{background:var(--accent);color:#000;border-color:var(--accent)}
+.modal-body{padding:22px}
+.field-group{margin-bottom:16px}
+.field-label{font-size:11px;color:var(--text3);font-weight:600;margin-bottom:5px;letter-spacing:.4px;text-transform:uppercase}
+.field-val{font-size:13.5px;font-weight:500}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.input-field{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 11px;border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:var(--tr)}
+.input-field:focus{border-color:var(--accent)}
+textarea.input-field{min-height:80px;resize:vertical}
+select.input-field option{background:var(--bg3)}
+
+/* ── VIP CARDS ── */
+.vip-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:11px}
+.vip-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:16px 18px;cursor:pointer;transition:var(--tr)}
+.vip-card:hover{border-color:var(--border2);transform:translateY(-1px)}
+.vip-card.bad{border-color:rgba(239,68,68,.25)}
+.vip-card.warn{border-color:rgba(245,208,0,.2)}
+.vip-card.ok{border-color:rgba(34,197,94,.2)}
+.vip-name{font-size:11.5px;font-weight:600;color:var(--text2);margin-bottom:3px;line-height:1.4}
+.vip-produto{font-size:10px;color:var(--text3);margin-bottom:10px}
+.vip-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.vip-meta-val{font-size:14px;font-weight:700}
+.vip-meta-val.ok{color:var(--green)}.vip-meta-val.warn{color:var(--amber)}.vip-meta-val.bad{color:var(--red)}
+
+/* ── INDICATOR ROWS ── */
+.ind-row{display:grid;grid-template-columns:2.5fr 80px 80px 80px 80px;align-items:center;padding:11px 14px;border-bottom:1px solid var(--border);font-size:12px;transition:background .14s;cursor:pointer}
+.ind-row:hover{background:var(--bg3)}
+.ind-row.header{font-size:10.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;cursor:default}
+.ind-row.header:hover{background:transparent}
+
+/* ── PLANO DE VOO ── */
+.pvoo-grid{display:grid;grid-template-columns:repeat(31,1fr);gap:3px;margin-top:12px}
+.pvoo-day{height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;position:relative;cursor:pointer;transition:var(--tr)}
+.pvoo-day:hover{transform:scale(1.1);z-index:2}
+.pvoo-day.ok{background:var(--green2);color:var(--green)}
+.pvoo-day.bad{background:var(--red2);color:var(--red)}
+.pvoo-day.warn{background:var(--amber2);color:var(--amber)}
+.pvoo-day.proj{background:var(--bg4);color:var(--text3);border:1px dashed var(--border2)}
+.pvoo-day.meta{background:var(--accent3);color:var(--accent);border:1px solid var(--accent)}
+.pvoo-labels{display:grid;grid-template-columns:repeat(31,1fr);gap:3px;margin-bottom:3px}
+.pvoo-label{font-size:8px;color:var(--text3);text-align:center;font-weight:600}
+
+/* ── IA CHAT ── */
+.chat-wrap{display:flex;flex-direction:column;height:480px}
+.chat-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.msg{max-width:82%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.5}
+.msg.user{align-self:flex-end;background:var(--accent3);color:var(--text);border-bottom-right-radius:4px}
+.msg.ai{align-self:flex-start;background:var(--bg3);color:var(--text2);border-bottom-left-radius:4px}
+.msg.ai strong{color:var(--text)}
+.msg.ai .msg-tag{display:inline-block;font-size:10px;font-weight:700;background:var(--accent3);color:var(--accent);padding:1px 7px;border-radius:20px;margin-bottom:5px}
+.chat-input-row{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px}
+.chat-input{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 13px;border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:var(--tr)}
+.chat-input:focus{border-color:var(--accent)}
+.chat-send{background:var(--accent);border:none;color:#000;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:var(--tr)}
+.chat-send:hover{background:var(--accent2)}
+.chat-quick{padding:8px 16px 0;display:flex;gap:6px;flex-wrap:wrap}
+.quick-btn{background:var(--bg4);border:1px solid var(--border);color:var(--text3);padding:4px 10px;border-radius:20px;font-size:11px;cursor:pointer;transition:var(--tr)}
+.quick-btn:hover{border-color:var(--accent);color:var(--accent)}
+.typing{display:flex;gap:4px;align-items:center;padding:4px 0}
+.typing span{width:6px;height:6px;border-radius:50%;background:var(--text3);animation:typingDot 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes typingDot{0%,60%,100%{opacity:.3;transform:scale(1)}30%{opacity:1;transform:scale(1.3)}}
+
+/* ── FCA ── */
+.fca-section{border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.fca-title{font-size:12px;font-weight:700;color:var(--accent);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+
+/* ── PERFORMERS ── */
+.performer{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--border)}
+.performer:last-child{border-bottom:none}
+.perf-rank{font-size:11px;font-weight:700;color:var(--text3);width:18px}
+.perf-bar-wrap{flex:1}
+.perf-name{font-size:12.5px;font-weight:600;margin-bottom:4px}
+.perf-val{font-size:11.5px;font-weight:700;color:var(--accent);white-space:nowrap}
+
+/* ── SECTION HEADER ── */
+.section-header{margin-bottom:18px}
+.section-title{font-size:17px;font-weight:700;letter-spacing:-.3px;margin-bottom:3px}
+.section-sub{font-size:12.5px;color:var(--text3)}
+
+/* ── ALERTS ── */
+.alert{display:flex;align-items:flex-start;gap:10px;padding:12px 15px;border-radius:var(--r);margin-bottom:9px}
+.alert.warn{background:rgba(245,208,0,.06);border:1px solid rgba(245,208,0,.2)}
+.alert.info{background:rgba(255,255,255,.03);border:1px solid var(--border2)}
+.alert.ok{background:var(--green2);border:1px solid rgba(163,230,53,.2)}
+.alert.danger{background:var(--red2);border:1px solid rgba(255,133,133,.2)}
+.alert svg{width:15px;height:15px;flex-shrink:0;margin-top:1px}
+.alert.warn svg{color:var(--amber)}.alert.info svg{color:var(--text2)}.alert.ok svg{color:var(--green)}.alert.danger svg{color:var(--red)}
+.alert-text{font-size:12.5px;color:var(--text2)}
+.alert-text strong{color:var(--text)}
+
+/* ── HOME PAGE ── */
+.home-hero{background:var(--bg2);border:1px solid var(--border2);border-top:2px solid var(--accent);border-radius:16px;padding:32px 36px;margin-bottom:20px;position:relative;overflow:hidden}
+.home-hero::before{content:'';position:absolute;top:-30px;right:-30px;width:180px;height:180px;border-radius:50%;background:rgba(245,208,0,0.07);filter:blur(50px)}
+.home-hero-title{font-size:22px;font-weight:700;margin-bottom:6px;position:relative}
+.home-hero-sub{font-size:13px;color:var(--text3);position:relative;margin-bottom:20px}
+.home-stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;position:relative}
+.home-stat{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px 16px;transition:var(--tr)}.home-stat:hover{border-color:rgba(245,208,0,0.3)}
+.home-stat-label{font-size:10.5px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px}
+.home-stat-val{font-size:20px;font-weight:700}
+.home-stat-sub{font-size:11px;margin-top:3px}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(245,208,0,0.25);border-radius:3px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.grid4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:900px){
+  :root{--sidebar:0px}
+  #sidebar{transform:translateX(-244px);width:244px}
+  #sidebar.open{transform:translateX(0)}
+  #main{margin-left:0}
+  .menu-toggle{display:flex !important}
+  #content{padding:16px}
+  .grid2,.grid3{grid-template-columns:1fr}
+  .pvoo-grid{grid-template-columns:repeat(10,1fr)}
+  .pvoo-labels{grid-template-columns:repeat(10,1fr)}
+  .home-stats-row{grid-template-columns:1fr 1fr}
+}
+@media(max-width:600px){.kpi-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<div class="overlay" id="overlay" onclick="closeMobile()"></div>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside id="sidebar">
+  <div class="logo-wrap">
+    <div class="logo-icon">
+      <svg viewBox="0 0 20 20" fill="none"><rect x="2" y="2" width="16" height="16" rx="3" fill="#000"/><path d="M5 10h10M10 5v10" stroke="#f5d000" stroke-width="2" stroke-linecap="round"/></svg>
+    </div>
+    <div>
+      <div class="logo-text">GQT·RJO</div>
+      <div class="logo-sub">Telecom · RJO</div>
+    </div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">Início</div>
+    <div class="nav-item active" onclick="showPage('home')">
+      <svg viewBox="0 0 20 20" fill="none"><path d="M3 9l7-7 7 7v9a1 1 0 01-1 1H4a1 1 0 01-1-1V9z" stroke="currentColor" stroke-width="1.5"/><path d="M8 19v-7h4v7" stroke="currentColor" stroke-width="1.5"/></svg>
+      Painel Inicial
+    </div>
+    <div class="nav-section">Performance</div>
+    <div class="nav-item" onclick="showPage('indicadores')">
+      <svg viewBox="0 0 20 20" fill="none"><path d="M10 2l2.09 4.26L17 7.27l-3.5 3.41.83 4.82L10 13.27l-4.33 2.23L6.5 10.68 3 7.27l4.91-.71L10 2z" fill="currentColor"/></svg>
+      Indicadores VIP
+    </div>
+    <div class="nav-item" onclick="showPage('planosdevoo')">
+      <svg viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M3 8h14M8 4V2M12 4V2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Planos de Voo
+    </div>
+    <div class="nav-section">Gestão</div>
+    <div class="nav-item" onclick="showPage('planoacao')">
+      <svg viewBox="0 0 20 20" fill="none"><path d="M4 5h12M4 10h8M4 15h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Planos de Ação / FCA
+    </div>
+    <div class="nav-item" onclick="showPage('ia')">
+      <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M7 9.5c0-1.66 1.34-3 3-3s3 1.34 3 3-1.34 3-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="14" r=".8" fill="currentColor"/></svg>
+      IA Assistente
+      <span class="nav-badge">novo</span>
+    </div>
+    <div class="nav-section">Analytics</div>
+    <div class="nav-item" onclick="showPage('relatorios')">
+      <svg viewBox="0 0 20 20" fill="none"><path d="M4 4h12v12H4z" stroke="currentColor" stroke-width="1.5" rx="2"/><path d="M7 10h6M7 13h4M7 7h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Relatórios
+    </div>
+    <div class="nav-item" onclick="showPage('alertas')">
+      <svg viewBox="0 0 20 20" fill="none"><path d="M10 3L2 17h16L10 3z" stroke="currentColor" stroke-width="1.5"/><path d="M10 8v4M10 14h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Alertas
+      <span class="nav-badge red" id="alertBadge">0</span>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="theme-btn" onclick="toggleTheme()">
+      <svg id="themeIco" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span id="themeLabel">Modo Claro</span>
+    </button>
+    <div class="user-card">
+      <div class="avatar">AG</div>
+      <div style="flex:1;min-width:0">
+        <div class="user-name">André Gomes</div>
+        <div class="user-role">Gerente Operacional</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<main id="main">
+  <header id="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" onclick="openMobile()">
+        <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div>
+        <div class="page-title" id="pageTitle">Painel Inicial</div>
+        <div class="breadcrumb" id="pageCrumb">Gestão da Qualidade Telecom - RJO · Mar/2026</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div style="display:flex;align-items:center;gap:7px;padding:6px 11px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;min-width:180px">
+        <svg width="13" height="13" viewBox="0 0 20 20" fill="none" style="color:var(--text3)"><circle cx="9" cy="9" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M15 15l-2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <input id="globalSearch" placeholder="Buscar indicador, PSR..." style="background:none;border:none;outline:none;color:var(--text);font-size:12px;width:100%;font-family:'DM Sans',sans-serif" oninput="doSearch(this.value)">
+      </div>
+      <button class="tb-btn" onclick="toggleTheme()" style="padding:6px 10px" title="Alternar tema">
+        <svg id="topThemeIco" width="14" height="14" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <button class="tb-btn primary" onclick="showPage('planoacao')">
+        <svg viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Novo Plano
+      </button>
+    </div>
+  </header>
+
+  <div id="content">
+
+<!-- ═══════════ HOME ═══════════ -->
+<div class="page active" id="pg-home">
+  <div class="home-hero">
+    <div class="home-hero-title">📊 Painel de Qualidade — RJO · FTTH · RJ</div>
+    <div class="home-hero-sub">Período de referência: Março 2026 · Última atualização: 01/03/2026</div>
+    <div class="home-stats-row" id="homeStats"></div>
+  </div>
+
+  <div class="grid2" style="margin-bottom:16px">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Performance por PSR</div>
+        <span class="card-action" onclick="showPage('indicadores')">Detalhar →</span>
+      </div>
+      <div style="position:relative;height:220px"><canvas id="chartHomePSR"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Indicadores por Status</div>
+      </div>
+      <div style="position:relative;height:220px"><canvas id="chartHomeStatus"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Ranking de Indicadores — Piores Desvios</div>
+        <span class="card-action" onclick="showPage('alertas')">Ver alertas →</span>
+      </div>
+      <div id="homeRanking"></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">PSRs fora da Meta</div>
+        <span class="card-action" onclick="showPage('ia')">Consultar IA →</span>
+      </div>
+      <div id="homePsrStatus"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ INDICADORES ═══════════ -->
+<div class="page" id="pg-indicadores">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px">
+    <div>
+      <div class="section-title">Indicadores VIP — Mar/2026</div>
+      <div class="section-sub">FTTH · RJ · <span id="indTotalOk"></span></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="tb-btn" onclick="exportIndicadoresPDF()">
+        <svg viewBox="0 0 20 20" fill="none"><path d="M4 16v1a1 1 0 001 1h10a1 1 0 001-1v-1M7 10l3 3 3-3M10 3v10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Exportar PDF
+      </button>
+    </div>
+  </div>
+
+  <div class="kpi-grid" id="indKPIs"></div>
+
+  <div class="filter-bar">
+    <span class="filter-label">Filtrar:</span>
+    <select class="filter-select" id="fProduto" onchange="renderIndicadores()">
+      <option value="">Todos os Produtos</option>
+      <option>FTTH</option>
+    </select>
+    <select class="filter-select" id="fPSR" onchange="renderIndicadores()">
+      <option value="">Todas as PSRs</option>
+      <option>ABILITY</option><option>TEL</option>
+    </select>
+    <select class="filter-select" id="fUF" onchange="renderIndicadores()">
+      <option value="">Todos os Estados</option>
+      <option>RJ</option>
+    </select>
+    <select class="filter-select" id="fStatus" onchange="renderIndicadores()">
+      <option value="">Todos os Status</option>
+      <option value="ok">Dentro da Meta</option>
+      <option value="bad">Fora da Meta</option>
+    </select>
+  </div>
+
+  <div class="card">
+    <div class="ind-row header">
+      <div>Indicador / PSR / UF</div>
+      <div>Produto</div>
+      <div>Meta</div>
+      <div>Resultado</div>
+      <div>Status</div>
+    </div>
+    <div id="indTable"></div>
+  </div>
+</div>
+
+<!-- ═══════════ PLANOS DE VOO ═══════════ -->
+<div class="page" id="pg-planosdevoo">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px">
+    <div>
+      <div class="section-title">Planos de Voo — Março 2026</div>
+      <div class="section-sub">Projeção diária do dia 01 ao dia 31 para cada indicador e PSR</div>
+    </div>
+    <button class="tb-btn" onclick="exportPVooPDF()">
+      <svg viewBox="0 0 20 20" fill="none"><path d="M4 16v1a1 1 0 001 1h10a1 1 0 001-1v-1M7 10l3 3 3-3M10 3v10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Exportar PDF
+    </button>
+  </div>
+
+  <div class="filter-bar">
+    <span class="filter-label">Visualizar:</span>
+    <select class="filter-select" id="pvPSR" onchange="renderPlanosVoo()">
+      <option value="">Todas as PSRs</option>
+      <option>ABILITY</option><option>TEL</option>
+    </select>
+    <select class="filter-select" id="pvIndicador" onchange="renderPlanosVoo()">
+      <option value="">Todos os Indicadores</option>
+    </select>
+  </div>
+
+  <div id="pvooContainer"></div>
+</div>
+
+<!-- ═══════════ PLANO DE AÇÃO / FCA ═══════════ -->
+<div class="page" id="pg-planoacao">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px">
+    <div>
+      <div class="section-title">Planos de Ação & FCA</div>
+      <div class="section-sub">Registre causas, ações corretivas e acompanhe PSRs fora da meta</div>
+    </div>
+    <button class="tb-btn primary" onclick="openFCAModal()">
+      <svg viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Novo FCA / Plano
+    </button>
+  </div>
+
+  <div id="fcaAlerts" style="margin-bottom:16px"></div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-header"><div class="card-title">PSRs Fora da Meta — Ações Necessárias</div></div>
+    <div id="fcaPSRTable"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">Planos de Ação Registrados</div></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>PSR</th><th>Indicador</th><th>Causa Raiz</th><th>Ação</th><th>Responsável</th><th>Prazo</th><th>Status</th></tr></thead>
+        <tbody id="fcaTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ IA ASSISTENTE ═══════════ -->
+<div class="page" id="pg-ia">
+  <div style="margin-bottom:18px">
+    <div class="section-title">IA Assistente de Qualidade</div>
+    <div class="section-sub">Análise inteligente dos indicadores · Sugestões de melhoria · Geração de planos de ação</div>
+  </div>
+  <div class="grid2">
+    <div class="card" style="padding:0;display:flex;flex-direction:column">
+      <div style="padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--accent3);display:flex;align-items:center;justify-content:center">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="var(--accent)" stroke-width="1.5"/><path d="M7 9.5c0-1.66 1.34-3 3-3s3 1.34 3 3-1.34 3-3 3" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:600">GQT·RJO Quality AI</div>
+          <div style="font-size:10.5px;color:var(--green)">● Online</div>
+        </div>
+      </div>
+      <div class="chat-wrap">
+        <div class="chat-quick" id="chatQuick">
+          <button class="quick-btn" onclick="sendQuick('Quais indicadores estão fora da meta?')">📊 Indicadores críticos</button>
+          <button class="quick-btn" onclick="sendQuick('Gere um plano de ação para Reparo no Prazo 24h TEL RJ')">📋 Plano de ação TEL</button>
+          <button class="quick-btn" onclick="sendQuick('Analise a performance da PSR TEL')">🔍 Análise TEL</button>
+          <button class="quick-btn" onclick="sendQuick('Quais PSRs precisam de FCA imediato?')">⚠️ FCA urgente</button>
+          <button class="quick-btn" onclick="sendQuick('Como melhorar Infância 30 Dias?')">💡 Sugestões Infância</button>
+        </div>
+        <div class="chat-msgs" id="chatMsgs">
+          <div class="msg ai">
+            <div class="msg-tag">GQT·RJO AI</div><br>
+            Olá, <strong>André</strong>! Sou o assistente de qualidade do GQT·RJO. Tenho acesso aos dados de performance de <strong>14 registros</strong> para as PSRs <strong>ABILITY e TEL</strong> no projeto GQT·RJO — produto FTTH · UF RJ.<br><br>
+            Posso ajudar com:<br>
+            • Análise de indicadores fora da meta<br>
+            • Geração de planos de ação e FCA<br>
+            • Sugestões de melhoria por indicador/PSR<br>
+            • Projeções de fechamento do mês<br><br>
+            O que deseja analisar hoje?
+          </div>
+        </div>
+        <div class="chat-input-row">
+          <input class="chat-input" id="chatInput" placeholder="Pergunte sobre indicadores, PSRs, planos de ação..." onkeydown="if(event.key==='Enter')sendChat()">
+          <button class="chat-send" onclick="sendChat()">Enviar</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-header"><div class="card-title">Insights Automáticos</div></div>
+        <div id="iaInsights"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Ações Sugeridas pela IA</div></div>
+        <div id="iaAcoes"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ RELATÓRIOS ═══════════ -->
+<div class="page" id="pg-relatorios">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px">
+    <div>
+      <div class="section-title">Relatórios</div>
+      <div class="section-sub">Performance detalhada por indicador, produto e PSR</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="tb-btn" onclick="exportRelPDF()">
+        <svg viewBox="0 0 20 20" fill="none"><path d="M4 16v1a1 1 0 001 1h10a1 1 0 001-1v-1M7 10l3 3 3-3M10 3v10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Exportar PDF
+      </button>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchRelTab(this,'rel-resumo')">Resumo Geral</div>
+    <div class="tab" onclick="switchRelTab(this,'rel-psr')">Por PSR</div>
+    <div class="tab" onclick="switchRelTab(this,'rel-produto')">Por Produto</div>
+    <div class="tab" onclick="switchRelTab(this,'rel-exec')">Executivo</div>
+  </div>
+  <div id="rel-resumo"><div class="grid2" style="margin-bottom:16px">
+    <div class="card"><div class="card-header"><div class="card-title">Resultado por Indicador</div></div><div style="position:relative;height:280px"><canvas id="chartRelInd"></canvas></div></div>
+    <div class="card"><div class="card-header"><div class="card-title">Performance por PSR</div></div><div style="position:relative;height:280px"><canvas id="chartRelPSR"></canvas></div></div>
+  </div>
+  <div class="card"><div class="card-header"><div class="card-title">Tabela Completa de Performance</div></div><div class="table-wrap"><table><thead><tr><th>Indicador</th><th>Produto</th><th>PSR</th><th>UF</th><th>Meta</th><th>Resultado</th><th>Desvio</th><th>Status</th></tr></thead><tbody id="relTableBody"></tbody></table></div></div></div>
+  <div id="rel-psr" style="display:none"><div id="relPSRContent"></div></div>
+  <div id="rel-produto" style="display:none"><div id="relProdutoContent"></div></div>
+  <div id="rel-exec" style="display:none"><div id="relExecContent"></div></div>
+</div>
+
+<!-- ═══════════ ALERTAS ═══════════ -->
+<div class="page" id="pg-alertas">
+  <div class="section-header">
+    <div class="section-title">Central de Alertas</div>
+    <div class="section-sub">Monitoramento em tempo real dos indicadores críticos</div>
+  </div>
+  <div id="alertasContent"></div>
+  <div class="card" style="margin-top:18px">
+    <div class="card-header"><div class="card-title">Histórico de Alertas</div></div>
+    <div class="table-wrap"><table><thead><tr><th>Indicador</th><th>PSR</th><th>UF</th><th>Meta</th><th>Resultado</th><th>Desvio</th><th>Severidade</th></tr></thead><tbody id="alertasTable"></tbody></table></div>
+  </div>
+</div>
+
+  </div><!-- /content -->
+</main>
+
+<!-- MODAL FCA / PLANO DE AÇÃO -->
+<div class="modal-bg" id="fcaModal">
+  <div class="modal wide">
+    <div class="modal-header">
+      <div class="modal-title">Novo FCA / Plano de Ação</div>
+      <div class="modal-close" onclick="closeModal('fcaModal')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="fca-section">
+        <div class="fca-title">📌 F — Fato (O que aconteceu?)</div>
+        <div class="field-grid">
+          <div class="field-group">
+            <div class="field-label">PSR</div>
+            <select class="input-field" id="fcaPSR"><option>ABILITY</option><option>TEL</option></select>
+          </div>
+          <div class="field-group">
+            <div class="field-label">UF</div>
+            <select class="input-field" id="fcaUF"><option>RJ</option><option>SP</option><option>MG</option><option>ES</option></select>
+          </div>
+          <div class="field-group">
+            <div class="field-label">Indicador</div>
+            <select class="input-field" id="fcaIndicador"></select>
+          </div>
+          <div class="field-group">
+            <div class="field-label">Resultado Atual</div>
+            <input class="input-field" id="fcaResultado" placeholder="Ex: 62,84%">
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Descrição do Problema</div>
+          <textarea class="input-field" id="fcaFato" placeholder="Descreva o desvio de performance identificado..."></textarea>
+        </div>
+      </div>
+      <div class="fca-section">
+        <div class="fca-title">🔍 C — Causa (Por que aconteceu?)</div>
+        <div class="field-group">
+          <div class="field-label">Causa Raiz</div>
+          <select class="input-field" id="fcaCausaTipo">
+            <option>Capacidade operacional insuficiente</option>
+            <option>Falta de técnicos disponíveis</option>
+            <option>Problemas sistêmicos / tecnológicos</option>
+            <option>Alta demanda / sazonalidade</option>
+            <option>Falha de processo interno</option>
+            <option>Problemas de infraestrutura</option>
+            <option>Falta de treinamento</option>
+            <option>Outra causa</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Detalhamento da Causa</div>
+          <textarea class="input-field" id="fcaCausa" placeholder="Detalhe a causa identificada via análise (5 porquês, Ishikawa...)..."></textarea>
+        </div>
+      </div>
+      <div class="fca-section">
+        <div class="fca-title">✅ A — Ação (O que será feito?)</div>
+        <div class="field-group">
+          <div class="field-label">Plano de Ação</div>
+          <textarea class="input-field" id="fcaAcao" placeholder="Descreva as ações corretivas e preventivas a serem tomadas..."></textarea>
+        </div>
+        <div class="field-grid">
+          <div class="field-group">
+            <div class="field-label">Responsável</div>
+            <input class="input-field" id="fcaResponsavel" placeholder="Nome do responsável" value="André Gomes">
+          </div>
+          <div class="field-group">
+            <div class="field-label">Prazo</div>
+            <input class="input-field" type="date" id="fcaPrazo">
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Meta a Atingir</div>
+          <input class="input-field" id="fcaMeta" placeholder="Ex: Atingir 90% até 31/03/2026">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+        <button class="tb-btn" onclick="closeModal('fcaModal')">Cancelar</button>
+        <button class="tb-btn" onclick="generateFCAWithAI()" style="border-color:var(--accent);color:var(--accent)">
+          <svg viewBox="0 0 20 20" fill="none" width="13" height="13"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/></svg>
+          Gerar com IA
+        </button>
+        <button class="tb-btn primary" onclick="saveFCA()">Salvar FCA</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PVOO DETALHE -->
+<div class="modal-bg" id="pvooModal">
+  <div class="modal wide">
+    <div class="modal-header">
+      <div class="modal-title" id="pvooModalTitle">Plano de Voo</div>
+      <div class="modal-close" onclick="closeModal('pvooModal')">✕</div>
+    </div>
+    <div class="modal-body" id="pvooModalBody"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// DADOS: apenas produto FTTH · UF RJ
+// ═══════════════════════════════════════
+const DB = [
+  {produto:"FTTH",indicador:"Cumprimento 1a Agenda/ Antecipação Instalação",uf:"RJ",psr:"TEL",   meta:90,resultado:86.56,regra:"MAIOR"},
+  {produto:"FTTH",indicador:"Cumprimento 1a Agenda/ Antecipação Instalação",uf:"RJ",psr:"ABILITY",meta:90,resultado:92.07,regra:"MAIOR"},
+  {produto:"FTTH",indicador:"Cumprimento 1a Agenda/ Antecipação Reparo",    uf:"RJ",psr:"TEL",   meta:90,resultado:70.76,regra:"MAIOR"},
+  {produto:"FTTH",indicador:"Cumprimento 1a Agenda/ Antecipação Reparo",    uf:"RJ",psr:"ABILITY",meta:90,resultado:79.71,regra:"MAIOR"},
+  {produto:"FTTH",indicador:"Infância 30 Dias",                             uf:"RJ",psr:"TEL",   meta:3.5,resultado:9.14, regra:"MENOR"},
+  {produto:"FTTH",indicador:"Infância 30 Dias",                             uf:"RJ",psr:"ABILITY",meta:3.5,resultado:5.96,regra:"MENOR"},
+  {produto:"FTTH",indicador:"Instalação no Prazo 96h",                      uf:"RJ",psr:"ABILITY",meta:90,resultado:95.2, regra:"MAIOR"},
+  {produto:"FTTH",indicador:"Instalação no Prazo 96h",                      uf:"RJ",psr:"TEL",   meta:90,resultado:91.86,regra:"MAIOR"},
+  {produto:"FTTH",indicador:"Reparo no Prazo 24h",                          uf:"RJ",psr:"TEL",   meta:90,resultado:62.84,regra:"MAIOR"},
+  {produto:"FTTH",indicador:"Reparo no Prazo 24h",                          uf:"RJ",psr:"ABILITY",meta:90,resultado:69.16,regra:"MAIOR"},
+  {produto:"FTTH",indicador:"Reparo por Planta",                            uf:"RJ",psr:"ABILITY",meta:2, resultado:3.05, regra:"MENOR"},
+  {produto:"FTTH",indicador:"Reparo por Planta",                            uf:"RJ",psr:"TEL",   meta:2, resultado:4.11, regra:"MENOR"},
+  {produto:"FTTH",indicador:"Repetida 30 Dias",                             uf:"RJ",psr:"ABILITY",meta:9, resultado:11.26,regra:"MENOR"},
+  {produto:"FTTH",indicador:"Repetida 30 Dias",                             uf:"RJ",psr:"TEL",   meta:9, resultado:20.82,regra:"MENOR"},
+];
+
+// Planos de ação salvos
+let fcaPlans = [];
+
+// ─── HELPERS ──────────────────────────────────────────
+function isOK(d){
+  if(d.regra==='MENOR') return d.resultado <= d.meta;
+  return d.resultado >= d.meta;
+}
+function statusOf(d){
+  if(isOK(d)) return 'ok';
+  const gap = d.regra==='MENOR' ? (d.resultado-d.meta)/d.meta : (d.meta-d.resultado)/d.meta;
+  return gap > 0.15 ? 'bad' : 'warn';
+}
+function badgeSt(s){
+  const m={ok:'<span class="badge green">✓ OK</span>',warn:'<span class="badge amber">⚠ Atenção</span>',bad:'<span class="badge red">✗ Crítico</span>'};
+  return m[s]||'';
+}
+function fmt(v){return typeof v==='number'?v.toFixed(2)+'%':v}
+function isDark(){return !document.body.classList.contains('light')}
+
+// ── PALETA SUAVE DUAL-MODE ──────────────────────────────
+const PALETTE={
+  // Verde: suave, legível em fundo escuro e claro
+  green:  {dark:'#86efac',light:'#16a34a',bgd:'rgba(134,239,172,0.16)',bgl:'rgba(22,163,74,0.10)'},
+  // Vermelho: rosado no dark, médio no light — não agride
+  red:    {dark:'#fda4af',light:'#dc2626',bgd:'rgba(253,164,175,0.15)',bgl:'rgba(220,38,38,0.09)'},
+  // Âmbar: amarelo pastel no dark, laranja queimado no light
+  amber:  {dark:'#fde68a',light:'#b45309',bgd:'rgba(253,230,138,0.16)',bgl:'rgba(180,83,9,0.10)'},
+  // Azul: azul-céu pastel no dark, sólido no light
+  blue:   {dark:'#bae6fd',light:'#0284c7',bgd:'rgba(186,230,253,0.15)',bgl:'rgba(2,132,199,0.10)'},
+  // Violeta: lavanda pastel
+  purple: {dark:'#ddd6fe',light:'#7c3aed',bgd:'rgba(221,214,254,0.15)',bgl:'rgba(124,58,237,0.09)'},
+  // Teal: menta pastel
+  teal:   {dark:'#99f6e4',light:'#0d9488',bgd:'rgba(153,246,228,0.15)',bgl:'rgba(13,148,136,0.09)'},
+  // Cinza neutro
+  muted:  {dark:'#d4d4d8',light:'#71717a',bgd:'rgba(212,212,216,0.12)',bgl:'rgba(113,113,122,0.07)'},
+  // Marca GQT·RJO amarela
+  brand:  {dark:'#fef08a',light:'#ca8a04',bgd:'rgba(254,240,138,0.18)',bgl:'rgba(202,138,4,0.11)'},
+};
+function P(k){return PALETTE[k][isDark()?'dark':'light']}
+function PB(k){return PALETTE[k][isDark()?'bgd':'bgl']}
+const PSR_COL={ABILITY:'blue', TEL:'teal'};
+function statusColor(s){return s==='ok'?'green':s==='bad'?'red':'amber'}
+
+function chartTooltip(){
+  const dk=isDark();
+  return{
+    backgroundColor:dk?'rgba(0,0,0,0.97)':'rgba(255,255,255,0.98)',
+    titleColor:dk?'#f5d000':'#000000',
+    bodyColor:dk?'#d4d4d4':'#333333',
+    borderColor:dk?'rgba(245,208,0,0.25)':'rgba(0,0,0,0.10)',
+    borderWidth:1,padding:11,cornerRadius:8,
+    titleFont:{size:12,weight:'700'},bodyFont:{size:11.5}
+  };
+}
+function chartColors(){
+  return isDark()
+    ?{grid:'rgba(255,255,255,0.06)',tick:'#666666',legend:'#999999'}
+    :{grid:'rgba(0,0,0,0.08)',      tick:'#999999',legend:'#555555'};
+}
+const charts={};
+function mkChart(id,type,data,opts){
+  const el=document.getElementById(id);if(!el)return;
+  if(charts[id])charts[id].destroy();
+  charts[id]=new Chart(el,{type,data,options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:chartTooltip()},...opts}});
+}
+
+// ─── NAVIGATION ──────────────────────────────────────
+const pageTitles={home:['Painel Inicial','GQT·RJO · Gestão da Qualidade Telecom'],indicadores:['Indicadores VIP','GQT·RJO · Performance Mar/2026'],planosdevoo:['Planos de Voo','GQT·RJO · Projeção Diária Março'],planoacao:['Planos de Ação / FCA','GQT·RJO · Planos de Ação'],ia:['IA Assistente','GQT·RJO · Quality AI'],relatorios:['Relatórios','GQT·RJO · Analytics'],alertas:['Alertas','GQT·RJO · Central de Alertas']};
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const pg=document.getElementById('pg-'+id);
+  if(pg)pg.classList.add('active');
+  const nav=document.querySelector(`.nav-item[onclick="showPage('${id}')"]`);
+  if(nav)nav.classList.add('active');
+  const t=pageTitles[id]||[id,id];
+  document.getElementById('pageTitle').textContent=t[0];
+  document.getElementById('pageCrumb').textContent=t[1];
+  closeMobile();
+  setTimeout(()=>initPage(id),60);
+}
+function openMobile(){document.getElementById('sidebar').classList.add('open');document.getElementById('overlay').classList.add('open')}
+function closeMobile(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+
+// ─── PAGE INIT ───────────────────────────────────────
+function initPage(id){
+  if(id==='home')initHome();
+  if(id==='indicadores')renderIndicadores();
+  if(id==='planosdevoo')initPlanosVoo();
+  if(id==='planoacao')initFCA();
+  if(id==='ia')initIA();
+  if(id==='relatorios')initRelatorios();
+  if(id==='alertas')initAlertas();
+}
+
+// ─── HOME ────────────────────────────────────────────
+function initHome(){
+  const total=DB.length;
+  const ok=DB.filter(isOK).length;
+  const bad=DB.filter(d=>statusOf(d)==='bad').length;
+  const psrsBad=[...new Set(DB.filter(d=>!isOK(d)).map(d=>d.psr))];
+
+  document.getElementById('homeStats').innerHTML=`
+    <div class="home-stat"><div class="home-stat-label">Total Indicadores</div><div class="home-stat-val">${total}</div><div class="home-stat-sub" style="color:var(--text3)">registros ativos</div></div>
+    <div class="home-stat"><div class="home-stat-label">Dentro da Meta</div><div class="home-stat-val" style="color:var(--green)">${ok}</div><div class="home-stat-sub up">${((ok/total)*100).toFixed(0)}% do total</div></div>
+    <div class="home-stat"><div class="home-stat-label">Fora da Meta</div><div class="home-stat-val" style="color:var(--red)">${total-ok}</div><div class="home-stat-sub down">${(((total-ok)/total)*100).toFixed(0)}% do total</div></div>
+    <div class="home-stat"><div class="home-stat-label">PSRs com Desvio</div><div class="home-stat-val" style="color:var(--amber)">${psrsBad.length}</div><div class="home-stat-sub neutral">${psrsBad.join(', ')}</div></div>`;
+
+  // PSR chart — grouped bars, suaves
+  const psrs=['ABILITY','TEL'];
+  const psrOk=psrs.map(p=>DB.filter(d=>d.psr===p&&isOK(d)).length);
+  const psrWarn=psrs.map(p=>DB.filter(d=>d.psr===p&&statusOf(d)==='warn').length);
+  const psrBad=psrs.map(p=>DB.filter(d=>d.psr===p&&statusOf(d)==='bad').length);
+  const c=chartColors();
+  if(charts['chartHomePSR'])charts['chartHomePSR'].destroy();
+  charts['chartHomePSR']=new Chart(document.getElementById('chartHomePSR'),{type:'bar',
+    data:{labels:psrs,datasets:[
+      {label:'Dentro da Meta', data:psrOk,   backgroundColor:PB('green'), borderColor:P('green'), borderWidth:1.5,borderRadius:5,borderSkipped:false},
+      {label:'Atenção',        data:psrWarn, backgroundColor:PB('amber'), borderColor:P('amber'), borderWidth:1.5,borderRadius:5,borderSkipped:false},
+      {label:'Fora da Meta',   data:psrBad,  backgroundColor:PB('red'),   borderColor:P('red'),   borderWidth:1.5,borderRadius:5,borderSkipped:false}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      scales:{
+        x:{ticks:{color:c.tick,font:{size:11.5,weight:'500'}},grid:{display:false}},
+        y:{ticks:{color:c.tick,font:{size:10}},grid:{color:c.grid},border:{display:false}}
+      },
+      plugins:{
+        legend:{display:true,position:'top',labels:{color:c.legend,font:{size:11},boxWidth:8,usePointStyle:true,pointStyle:'circle',padding:16}},
+        tooltip:chartTooltip()
+      }}});
+
+  // Status donut — 3 fatias suaves
+  if(charts['chartHomeStatus'])charts['chartHomeStatus'].destroy();
+  charts['chartHomeStatus']=new Chart(document.getElementById('chartHomeStatus'),{type:'doughnut',
+    data:{labels:['Dentro da Meta','Atenção','Crítico'],
+      datasets:[{
+        data:[ok, DB.filter(d=>statusOf(d)==='warn').length, bad],
+        backgroundColor:[PB('green'),PB('amber'),PB('red')],
+        borderColor:[P('green'),P('amber'),P('red')],
+        borderWidth:2,hoverOffset:10,
+        hoverBackgroundColor:[P('green'),P('amber'),P('red')]
+      }]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',
+      plugins:{
+        legend:{display:true,position:'right',labels:{color:c.legend,font:{size:11},boxWidth:8,padding:14,usePointStyle:true,pointStyle:'circle'}},
+        tooltip:chartTooltip()
+      }}});
+
+  // Worst desvios
+  const desvios=DB.map(d=>{
+    const gap=d.regra==='MENOR'?(d.resultado-d.meta)/d.meta*100:(d.meta-d.resultado)/d.meta*100;
+    return{...d,gap};
+  }).filter(d=>d.gap>0).sort((a,b)=>b.gap-a.gap).slice(0,8);
+  document.getElementById('homeRanking').innerHTML=desvios.map((d,i)=>`
+    <div class="performer" onclick="showPage('indicadores')">
+      <div class="perf-rank">${i+1}</div>
+      <div class="perf-bar-wrap">
+        <div class="perf-name" style="font-size:11.5px">${d.indicador} · ${d.psr} · ${d.uf}</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(d.gap*2,100)}%;background:${d.gap>20?'var(--red)':'var(--amber)'}"></div></div>
+      </div>
+      <div class="perf-val" style="color:var(--red)">-${d.gap.toFixed(1)}%</div>
+    </div>`).join('');
+
+  // PSR fora da meta
+  const psrStatus=psrs.map(p=>{
+    const recs=DB.filter(d=>d.psr===p);
+    const okN=recs.filter(isOK).length;
+    return{psr:p,total:recs.length,ok:okN,bad:recs.length-okN,pct:((okN/recs.length)*100).toFixed(0)};
+  });
+  document.getElementById('homePsrStatus').innerHTML=psrStatus.map(p=>`
+    <div style="padding:12px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+        <div style="font-size:13px;font-weight:600">${p.psr}</div>
+        <div style="display:flex;gap:5px">
+          <span class="badge green">${p.ok} ok</span>
+          ${p.bad>0?`<span class="badge red">${p.bad} fora</span>`:''}
+        </div>
+      </div>
+      <div class="progress-bar" style="height:6px"><div class="progress-fill" style="width:${p.pct}%;background:${p.pct<70?'var(--red)':p.pct<90?'var(--amber)':'var(--green)'}"></div></div>
+      <div style="font-size:10.5px;color:var(--text3);margin-top:4px">${p.pct}% dentro da meta · ${p.total} registros</div>
+    </div>`).join('');
+
+  document.getElementById('alertBadge').textContent=DB.filter(d=>statusOf(d)==='bad').length;
+}
+
+// ─── INDICADORES ─────────────────────────────────────
+function renderIndicadores(){
+  const fp=document.getElementById('fProduto')?.value||'';
+  const fPSR=document.getElementById('fPSR')?.value||'';
+  const fUF=document.getElementById('fUF')?.value||'';
+  const fs=document.getElementById('fStatus')?.value||'';
+  const filtered=DB.filter(d=>{
+    if(fp&&d.produto!==fp)return false;
+    if(fPSR&&d.psr!==fPSR)return false;
+    if(fUF&&d.uf!==fUF)return false;
+    if(fs==='ok'&&!isOK(d))return false;
+    if(fs==='bad'&&isOK(d))return false;
+    return true;
+  });
+  const ok=filtered.filter(isOK).length;
+  document.getElementById('indTotalOk').textContent=`${ok} dentro da meta · ${filtered.length-ok} fora · ${filtered.length} total`;
+  // KPIs
+  const kpis=[{l:'Total',v:filtered.length,c:'var(--text)'},{l:'OK',v:ok,c:'var(--green)'},{l:'Atenção',v:filtered.filter(d=>statusOf(d)==='warn').length,c:'var(--amber)'},{l:'Crítico',v:filtered.filter(d=>statusOf(d)==='bad').length,c:'var(--red)'}];
+  document.getElementById('indKPIs').innerHTML=kpis.map(k=>`<div class="kpi"><div class="kpi-label">${k.l}</div><div class="kpi-value" style="color:${k.c}">${k.v}</div></div>`).join('');
+  // Table
+  document.getElementById('indTable').innerHTML=filtered.sort((a,b)=>{
+    const ga=statusOf(a)==='bad'?2:statusOf(a)==='warn'?1:0;
+    const gb=statusOf(b)==='bad'?2:statusOf(b)==='warn'?1:0;
+    return gb-ga;
+  }).map(d=>`
+    <div class="ind-row" onclick="openVipDetail(${JSON.stringify(d).replace(/"/g,'&quot;')})">
+      <div><span style="font-size:12px;font-weight:600">${d.indicador}</span><br><span style="font-size:10.5px;color:var(--text3)">${d.psr} · ${d.uf}</span></div>
+      <div><span class="badge gray">${d.produto}</span></div>
+      <div class="mono">${fmt(d.meta)}</div>
+      <div class="mono" style="font-weight:700;color:${statusOf(d)==='ok'?'var(--green)':statusOf(d)==='warn'?'var(--amber)':'var(--red)'}">${fmt(d.resultado)}</div>
+      <div>${badgeSt(statusOf(d))}</div>
+    </div>`).join('');
+}
+
+function openVipDetail(d){
+  if(typeof d==='string')d=JSON.parse(d.replace(/&quot;/g,'"'));
+  const s=statusOf(d);
+  const gap=d.regra==='MENOR'?(d.resultado-d.meta):(d.meta-d.resultado);
+  const modal=document.createElement('div');
+  modal.className='modal-bg open';modal.id='detailModal';
+  modal.innerHTML=`<div class="modal"><div class="modal-header"><div class="modal-title">${d.indicador}</div><div class="modal-close" onclick="document.getElementById('detailModal').remove()">✕</div></div>
+  <div class="modal-body">
+    <div class="field-grid" style="margin-bottom:18px">
+      <div class="field-group"><div class="field-label">PSR</div><div class="field-val">${d.psr}</div></div>
+      <div class="field-group"><div class="field-label">UF</div><div class="field-val">${d.uf}</div></div>
+      <div class="field-group"><div class="field-label">Produto</div><div class="field-val">${d.produto}</div></div>
+      <div class="field-group"><div class="field-label">Regra</div><div class="field-val">Quanto ${d.regra==='MENOR'?'Menor':'Maior'}, Melhor</div></div>
+      <div class="field-group"><div class="field-label">Meta</div><div class="field-val" style="font-size:20px;font-weight:700;color:var(--accent)">${fmt(d.meta)}</div></div>
+      <div class="field-group"><div class="field-label">Resultado</div><div class="field-val" style="font-size:20px;font-weight:700;color:${s==='ok'?'var(--green)':s==='warn'?'var(--amber)':'var(--red)'}">${fmt(d.resultado)}</div></div>
+    </div>
+    <div class="field-group"><div class="field-label">Desvio</div>
+      <div style="font-size:14px;font-weight:600;color:${gap>0?'var(--red)':'var(--green)'}">${gap>0?'▼':'+'}${Math.abs(gap).toFixed(2)}pp ${gap>0?'abaixo':'acima'} da meta</div>
+    </div>
+    <div class="progress-bar" style="height:8px;margin:12px 0 18px">
+      <div class="progress-fill" style="width:${Math.min((d.resultado/d.meta)*100,100).toFixed(0)}%;background:${s==='ok'?'var(--green)':s==='warn'?'var(--amber)':'var(--red)'}"></div>
+    </div>
+    ${s!=='ok'?`<div style="display:flex;gap:8px;margin-top:8px"><button class="tb-btn primary" onclick="document.getElementById('detailModal').remove();openFCAModal('${d.psr}','${d.indicador}','${d.resultado}')">Criar FCA / Plano de Ação</button><button class="tb-btn" onclick="document.getElementById('detailModal').remove();showPage('ia')">Consultar IA</button></div>`:''}
+  </div></div>`;
+  document.body.appendChild(modal);
+  modal.onclick=e=>{if(e.target===modal)modal.remove()};
+}
+
+// ─── PLANOS DE VOO ────────────────────────────────────
+function initPlanosVoo(){
+  const inds=[...new Set(DB.map(d=>d.indicador))].sort();
+  const sel=document.getElementById('pvIndicador');
+  if(sel){sel.innerHTML='<option value="">Todos os Indicadores</option>'+inds.map(i=>`<option value="${i}">${i}</option>`).join('');}
+  renderPlanosVoo();
+}
+
+function pvooStatus(resultado,meta,regra,day,totalDays){
+  // Projeção linear: dias passados usam resultado, dias futuros projetam tendência
+  const pct=day/totalDays;
+  if(day<=1) return 'meta'; // linha de meta
+  // Simula variação diária ±3% em torno do resultado acumulado
+  const variation=(Math.sin(day*1.3)*2.5)+(Math.cos(day*0.8)*1.5);
+  const projected=resultado+variation*(1-pct*0.5);
+  const ok=regra==='MENOR'?projected<=meta:projected>=meta;
+  if(day>26)return 'proj'; // dias futuros
+  return ok?'ok':projected<meta*0.85||projected>meta*1.15?'bad':'warn';
+}
+
+function renderPlanosVoo(){
+  const fPSR=document.getElementById('pvPSR')?.value||'';
+  const fInd=document.getElementById('pvIndicador')?.value||'';
+  const filtered=DB.filter(d=>{
+    if(fPSR&&d.psr!==fPSR)return false;
+    if(fInd&&d.indicador!==fInd)return false;
+    return true;
+  });
+  const container=document.getElementById('pvooContainer');
+  if(!container)return;
+  if(!filtered.length){container.innerHTML='<div style="text-align:center;padding:40px;color:var(--text3)">Nenhum indicador encontrado para os filtros selecionados.</div>';return;}
+  const days=Array.from({length:31},(_,i)=>i+1);
+  container.innerHTML=filtered.map(d=>{
+    const s=statusOf(d);
+    const dayBars=days.map(day=>{
+      const st=pvooStatus(d.resultado,d.meta,d.regra,day,31);
+      const dayVal=(d.resultado+(Math.sin(day*1.1)*2.1+Math.cos(day*0.7)*1.3)*(1-day/60)).toFixed(1);
+      return`<div class="pvoo-day ${st}" title="Dia ${day}: ${dayVal}%" onclick="openPvooDay(${day},'${d.indicador}','${d.psr}','${d.uf}','${d.resultado}','${d.meta}','${d.regra}')">${day}</div>`;
+    }).join('');
+    return`<div class="card" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+        <div>
+          <div style="font-size:13px;font-weight:700">${d.indicador}</div>
+          <div style="font-size:11px;color:var(--text3)">${d.produto} · ${d.psr} · ${d.uf}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-size:11px;color:var(--text3)">Meta: <strong style="color:var(--accent)">${fmt(d.meta)}</strong></span>
+          <span style="font-size:11px;color:var(--text3)">Atual: <strong style="color:${s==='ok'?'var(--green)':s==='bad'?'var(--red)':'var(--amber)'}">${fmt(d.resultado)}</strong></span>
+          ${badgeSt(s)}
+        </div>
+      </div>
+      <div class="pvoo-labels">${days.map(d=>`<div class="pvoo-label">${d}</div>`).join('')}</div>
+      <div class="pvoo-grid">${dayBars}</div>
+      <div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap">
+        <span style="font-size:10px;color:var(--green)">■ Dentro da meta</span>
+        <span style="font-size:10px;color:var(--amber)">■ Atenção</span>
+        <span style="font-size:10px;color:var(--red)">■ Crítico</span>
+        <span style="font-size:10px;color:var(--text3)">□ Projetado</span>
+        <span style="font-size:10px;color:var(--accent)">■ Meta</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openPvooDay(day,ind,psr,uf,resultado,meta,regra){
+  const ok=regra==='MENOR'?parseFloat(resultado)<=parseFloat(meta):parseFloat(resultado)>=parseFloat(meta);
+  document.getElementById('pvooModalTitle').textContent=`Dia ${day} — ${ind} · ${psr} · ${uf}`;
+  document.getElementById('pvooModalBody').innerHTML=`
+    <div class="field-grid">
+      <div class="field-group"><div class="field-label">Indicador</div><div class="field-val">${ind}</div></div>
+      <div class="field-group"><div class="field-label">PSR / UF</div><div class="field-val">${psr} · ${uf}</div></div>
+      <div class="field-group"><div class="field-label">Meta</div><div class="field-val" style="font-size:18px;font-weight:700;color:var(--accent)">${parseFloat(meta).toFixed(2)}%</div></div>
+      <div class="field-group"><div class="field-label">Resultado Acumulado</div><div class="field-val" style="font-size:18px;font-weight:700;color:${ok?'var(--green)':'var(--red)'}">${parseFloat(resultado).toFixed(2)}%</div></div>
+    </div>
+    <div style="margin-top:14px;padding:12px;background:var(--bg3);border-radius:8px;font-size:12.5px;color:var(--text2)">
+      <strong style="color:var(--text)">Análise do Dia ${day}:</strong><br>
+      ${day<=26?'Dados históricos acumulados até este dia do mês.':'⚠ Dias futuros — valores projetados com base na tendência atual.'}<br>
+      ${ok?'✅ Indicador dentro da meta nesta data.':'⚠️ Indicador <strong style="color:var(--red)">abaixo da meta</strong> — ação recomendada.'}
+    </div>
+    ${!ok?`<div style="margin-top:12px"><button class="tb-btn primary" onclick="closeModal('pvooModal');openFCAModal('${psr}','${ind}','${resultado}')">Criar Plano de Ação</button></div>`:''}`;
+  document.getElementById('pvooModal').classList.add('open');
+}
+
+// ─── PLANO DE AÇÃO / FCA ─────────────────────────────
+function initFCA(){
+  // Populate indicador select in FCA modal
+  const inds=[...new Set(DB.map(d=>d.indicador))].sort();
+  const sel=document.getElementById('fcaIndicador');
+  if(sel)sel.innerHTML=inds.map(i=>`<option value="${i}">${i}</option>`).join('');
+  // Prazo default
+  const prazo=document.getElementById('fcaPrazo');
+  if(prazo)prazo.value='2026-03-31';
+
+  // Alerts: PSRs fora da meta
+  const badRecs=DB.filter(d=>statusOf(d)==='bad');
+  document.getElementById('fcaAlerts').innerHTML=badRecs.slice(0,4).map(d=>`
+    <div class="alert danger">
+      <svg viewBox="0 0 20 20" fill="none"><path d="M10 3L2 17h16L10 3z" stroke="currentColor" stroke-width="1.5"/><path d="M10 8v4M10 14h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <div class="alert-text"><strong>${d.indicador}</strong> · ${d.psr} · ${d.uf} — Resultado: ${fmt(d.resultado)} vs Meta: ${fmt(d.meta)}
+        <button class="tb-btn" onclick="openFCAModal('${d.psr}','${d.indicador}','${d.resultado}')" style="margin-left:10px;padding:3px 9px;font-size:11px">Criar FCA</button>
+      </div>
+    </div>`).join('');
+
+  // PSR table
+  const psrs=['ABILITY','TEL'];
+  document.getElementById('fcaPSRTable').innerHTML=`
+    <div style="padding:0 0 10px">
+      ${psrs.map(p=>{
+        const recs=DB.filter(d=>d.psr===p&&!isOK(d));
+        if(!recs.length)return`<div class="alert ok" style="margin-bottom:6px"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10l4 4 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><div class="alert-text"><strong>${p}</strong> — Todos os indicadores dentro da meta ✓</div></div>`;
+        return`<div style="margin-bottom:14px"><div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--red)">${p} — ${recs.length} indicador(es) fora da meta</div>
+        ${recs.map(d=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg3);border-radius:8px;margin-bottom:5px;font-size:12px">
+          <div><strong>${d.indicador}</strong> · ${d.uf}</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span style="color:var(--text3)">Meta: ${fmt(d.meta)}</span>
+            <span style="color:var(--red);font-weight:700">${fmt(d.resultado)}</span>
+            <button class="tb-btn" style="padding:3px 9px;font-size:11px" onclick="openFCAModal('${d.psr}','${d.indicador}','${d.resultado}')">FCA</button>
+          </div>
+        </div>`).join('')}
+        </div>`;
+      }).join('')}
+    </div>`;
+
+  renderFCATable();
+}
+
+function openFCAModal(psr,indicador,resultado){
+  if(psr){const s=document.getElementById('fcaPSR');if(s){for(let o of s.options)if(o.value===psr)o.selected=true;}}
+  if(indicador){const s=document.getElementById('fcaIndicador');if(s){for(let o of s.options)if(o.value===indicador)o.selected=true;}}
+  if(resultado)document.getElementById('fcaResultado').value=resultado+'%';
+  document.getElementById('fcaModal').classList.add('open');
+}
+
+function saveFCA(){
+  const psr=document.getElementById('fcaPSR').value;
+  const indicador=document.getElementById('fcaIndicador').value;
+  const fato=document.getElementById('fcaFato').value;
+  const causa=document.getElementById('fcaCausa').value;
+  const acao=document.getElementById('fcaAcao').value;
+  const resp=document.getElementById('fcaResponsavel').value;
+  const prazo=document.getElementById('fcaPrazo').value;
+  const meta=document.getElementById('fcaMeta').value;
+  if(!fato||!acao){alert('Preencha o Fato e a Ação antes de salvar.');return;}
+  fcaPlans.push({id:Date.now(),psr,indicador,fato,causa,acao,resp,prazo,meta,status:'Em andamento'});
+  closeModal('fcaModal');
+  renderFCATable();
+  showToast('Plano FCA salvo com sucesso!');
+}
+
+function renderFCATable(){
+  const tbody=document.getElementById('fcaTableBody');
+  if(!tbody)return;
+  if(!fcaPlans.length){tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text3)">Nenhum plano registrado ainda. Crie um FCA para começar.</td></tr>`;return;}
+  tbody.innerHTML=fcaPlans.map(p=>`<tr>
+    <td><span class="badge gray">${p.psr}</span></td>
+    <td style="font-size:11.5px">${p.indicador}</td>
+    <td style="font-size:11.5px;max-width:140px;overflow:hidden;text-overflow:ellipsis">${p.causa||'—'}</td>
+    <td style="font-size:11.5px;max-width:160px;overflow:hidden;text-overflow:ellipsis">${p.acao}</td>
+    <td>${p.resp}</td>
+    <td>${p.prazo}</td>
+    <td><span class="badge amber">${p.status}</span></td>
+  </tr>`).join('');
+}
+
+function generateFCAWithAI(){
+  const psr=document.getElementById('fcaPSR').value;
+  const ind=document.getElementById('fcaIndicador').value;
+  const rec=DB.find(d=>d.psr===psr&&d.indicador===ind);
+  if(!rec){alert('Selecione PSR e Indicador para gerar com IA.');return;}
+  // Simula geração por IA
+  const causas={
+    'Reparo no Prazo 24h':'Alta demanda por reparos FTTH combinada com capacidade insuficiente de técnicos especializados. Identificado como pico sazonal de março com aumento de 22% nas abertura de OSs.',
+    'Infância 30 Dias':'Qualidade de instalação comprometida por execução rápida sem verificação adequada do sinal. Técnicos realizando instalações sem teste de OPM.',
+    'Repetida 30 Dias':'Fechamentos temporários de OS sem resolução definitiva. Causa raiz: técnicos encerrando sem testar todos os pontos da rede.',
+    'Tempo Médio de Reparo':'Fila de OS antigas acumuladas sem gestão de aging. OSs com >7 dias não priorizadas no sistema.',
+    'default':'Análise de 5 porquês indica falha no processo de execução. Evidências apontam para gap de treinamento e falta de monitoramento diário dos indicadores.'
+  };
+  const acoes={
+    'Reparo no Prazo 24h':'1. Convocar equipe extra para os próximos 15 dias\n2. Priorizar OSs com aging >18h\n3. Bloquear novas aberturas até zerar fila crítica\n4. Reunião diária de acompanhamento às 8h',
+    'Infância 30 Dias':'1. Treinamento obrigatório sobre medição de OPM para todos os técnicos\n2. Bloqueio de encerramento de OS sem foto da medição\n3. Supervisão presencial nas primeiras 50 instalações',
+    'default':'1. Reunião de kick-off com PSR e supervisores\n2. Plano de recuperação com metas diárias\n3. Acompanhamento diário via dashboard\n4. Escalonamento para gerência se não atingir 80% em 7 dias'
+  };
+  const causa=causas[ind]||causas['default'];
+  const acao=acoes[ind]||acoes['default'];
+  document.getElementById('fcaCausa').value=causa;
+  document.getElementById('fcaAcao').value=acao;
+  document.getElementById('fcaMeta').value=`Atingir ${fmt(rec.meta)} até 31/03/2026`;
+  document.getElementById('fcaFato').value=`${ind} da PSR ${psr} no estado ${rec.uf} atingiu ${fmt(rec.resultado)}, abaixo da meta de ${fmt(rec.meta)}.`;
+  showToast('IA gerou sugestão de FCA! Revise e ajuste conforme necessário.');
+}
+
+// ─── IA ASSISTENTE ────────────────────────────────────
+function initIA(){
+  renderIAInsights();
+  renderIAAcoes();
+}
+
+function renderIAInsights(){
+  const el=document.getElementById('iaInsights');
+  if(!el)return;
+  const bad=DB.filter(d=>statusOf(d)==='bad').slice(0,4);
+  el.innerHTML=bad.map(d=>`<div class="alert danger" style="margin-bottom:7px">
+    <svg viewBox="0 0 20 20" fill="none" width="15" height="15"><path d="M10 3L2 17h16L10 3z" stroke="currentColor" stroke-width="1.5"/></svg>
+    <div class="alert-text" style="font-size:11.5px"><strong>${d.psr}·${d.uf}</strong> — ${d.indicador}: ${fmt(d.resultado)} (meta ${fmt(d.meta)})</div>
+  </div>`).join('');
+}
+
+function renderIAAcoes(){
+  const el=document.getElementById('iaAcoes');
+  if(!el)return;
+  const acoes=[
+    {icon:'📋',titulo:'Criar FCA — Reparo 24h TEL/RJ',desc:'Desvio de -27pp. Plano de recuperação urgente.',acao:"showPage('planoacao')"},
+    {icon:'📊',titulo:'Analisar Plano de Voo — Infância',desc:'4 PSRs acima da meta de 3,5%.',acao:"showPage('planosdevoo')"},
+    {icon:'⚠️',titulo:'Escalar — Repetida 30 dias',desc:'ABILITY/RJ: 57,2% vs meta de 19%.',acao:"sendQuick('Como resolver Repetida 30 dias FO B2B ABILITY RJ?')"},
+    {icon:'💡',titulo:'Otimizar Reparo no Prazo',desc:'5 PSRs com desvio crítico neste indicador.',acao:"sendQuick('Gere plano completo para Reparo no Prazo 24h')"},
+  ];
+  el.innerHTML=acoes.map(a=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer" onclick="${a.acao}">
+    <div style="font-size:18px;flex-shrink:0">${a.icon}</div>
+    <div style="flex:1"><div style="font-size:12.5px;font-weight:600">${a.titulo}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${a.desc}</div></div>
+    <svg width="12" height="12" viewBox="0 0 20 20" fill="none" style="color:var(--text3)"><path d="M7 4l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+  </div>`).join('');
+}
+
+let isTyping=false;
+function sendQuick(msg){
+  document.getElementById('chatInput').value=msg;
+  sendChat();
+}
+
+function sendChat(){
+  if(isTyping)return;
+  const input=document.getElementById('chatInput');
+  const msg=input.value.trim();
+  if(!msg)return;
+  input.value='';
+  addMsg('user',msg);
+  document.getElementById('chatQuick').style.display='none';
+  isTyping=true;
+  const typing=addTyping();
+  setTimeout(()=>{typing.remove();addMsg('ai',generateAIResponse(msg));isTyping=false;},1200+Math.random()*800);
+}
+
+function addMsg(type,text){
+  const msgs=document.getElementById('chatMsgs');
+  const div=document.createElement('div');
+  div.className=`msg ${type}`;
+  if(type==='ai'){div.innerHTML=`<div class="msg-tag">GQT·RJO AI</div><br>${text}`;}
+  else{div.textContent=text;}
+  msgs.appendChild(div);
+  msgs.scrollTop=msgs.scrollHeight;
+  return div;
+}
+function addTyping(){
+  const msgs=document.getElementById('chatMsgs');
+  const div=document.createElement('div');
+  div.className='msg ai';
+  div.innerHTML='<div class="typing"><span></span><span></span><span></span></div>';
+  msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
+  return div;
+}
+
+function generateAIResponse(msg){
+  const m=msg.toLowerCase();
+  const bad=DB.filter(d=>!isOK(d));
+  const critical=DB.filter(d=>statusOf(d)==='bad');
+
+  if(m.includes('fora da meta')||m.includes('crítico')||m.includes('critico')){
+    return`Identifiquei <strong>${critical.length} registros críticos</strong> (mais de 15% abaixo da meta):<br><br>`+
+    critical.slice(0,5).map(d=>`• <strong>${d.psr}·${d.uf}</strong> — ${d.indicador}: ${fmt(d.resultado)} (meta ${fmt(d.meta)})`).join('<br>')+
+    `<br><br>Os indicadores mais preocupantes são <strong>Reparo no Prazo 24h</strong> e <strong>Repetida 30 dias FO B2B</strong>. Deseja que eu gere planos de ação para algum deles?`;
+  }
+  if(m.includes('telemont')){
+    // TELEMONT não está no escopo atual (apenas FTTH/RJ)
+    if(m.includes('telemont')){
+      return`A PSR <strong>TELEMONT</strong> não está no escopo atual.<br>Os dados disponíveis são apenas <strong>produto FTTH · UF RJ</strong> para as PSRs <strong>ABILITY e TEL</strong>.`;
+    }
+    const recs=DB.filter(d=>d.psr==='TELEMONT');
+    const okN=recs.filter(isOK).length;
+    const badR=recs.filter(d=>!isOK(d));
+    return`Análise da PSR <strong>TELEMONT</strong>:<br><br>• Total de indicadores: ${recs.length}<br>• Dentro da meta: <span style="color:var(--green)">${okN}</span><br>• Fora da meta: <span style="color:var(--red)">${badR.length}</span><br><br>`+
+    `<strong>Principais desvios:</strong><br>`+
+    badR.slice(0,4).map(d=>`• ${d.indicador} · ${d.uf}: ${fmt(d.resultado)} vs ${fmt(d.meta)}`).join('<br>')+
+    `<br><br>Recomendo priorizar <strong>Reparo no Prazo Acesso/Backbone</strong> (ES: 52,17% vs meta 90%) como ação imediata.`;
+  }
+  if(m.includes('ability')){
+    const recs=DB.filter(d=>d.psr==='ABILITY');
+    const okN=recs.filter(isOK).length;
+    const badR=recs.filter(d=>!isOK(d));
+    return`Análise da PSR <strong>ABILITY</strong>:<br><br>• Total de indicadores: ${recs.length}<br>• Dentro da meta: <span style="color:var(--green)">${okN}</span><br>• Fora da meta: <span style="color:var(--red)">${badR.length}</span><br><br>`+
+    `Os piores desvios estão em <strong>Repetida 30 dias FO B2B</strong> (RJ: 57,2% vs meta 19%) e <strong>Reparo por Planta FO B2B</strong> (RJ: 6,26% vs meta 1,87%).`;
+  }
+  if(m.includes('tel')&&!m.includes('telemont')){
+    const recs=DB.filter(d=>d.psr==='TEL');
+    const okN=recs.filter(isOK).length;
+    const badR=recs.filter(d=>!isOK(d));
+    return`Análise da PSR <strong>TEL</strong>:<br><br>• Total: ${recs.length} | OK: <span style="color:var(--green)">${okN}</span> | Crítico: <span style="color:var(--red)">${badR.length}</span><br><br>`+
+    `Situação mais crítica: <strong>Reparo no Prazo 24h RJ</strong> (62,84% vs meta 90%) e <strong>Repetida 30 dias FO B2B</strong> (44,68% vs meta 19%).`;
+  }
+  if(m.includes('infância')||m.includes('infancia')){
+    const recs=DB.filter(d=>d.indicador.includes('Infância'));
+    return`Análise do indicador <strong>Infância 30 Dias</strong>:<br><br>`+
+    recs.map(d=>`• ${d.psr}·${d.uf}: ${fmt(d.resultado)} (meta ${fmt(d.meta)}) — ${badgeSt(statusOf(d))}`).join('<br>')+
+    `<br><br><strong>Recomendações:</strong><br>• Implementar checklist de qualidade pós-instalação<br>• Auditoria nas instalações realizadas nos últimos 15 dias<br>• Treinamento de medição OPM para técnicos TEL/RJ e ABILITY/RJ`;
+  }
+  if(m.includes('plano')||m.includes('ação')||m.includes('acao')){
+    const worst=DB.filter(d=>!isOK(d)).sort((a,b)=>{
+      const ga=a.regra==='MENOR'?(a.resultado-a.meta)/a.meta:(a.meta-a.resultado)/a.meta;
+      const gb=b.regra==='MENOR'?(b.resultado-b.meta)/b.meta:(b.meta-b.resultado)/b.meta;
+      return gb-ga;
+    })[0];
+    return`Gerei um <strong>Plano de Ação</strong> para o desvio mais crítico:<br><br>`+
+    `<strong>Indicador:</strong> ${worst.indicador}<br>`+
+    `<strong>PSR:</strong> ${worst.psr} · ${worst.uf}<br>`+
+    `<strong>Desvio:</strong> ${fmt(worst.resultado)} vs meta ${fmt(worst.meta)}<br><br>`+
+    `<strong>Ações propostas:</strong><br>`+
+    `1. Reunião de emergência com gestor da PSR em até 24h<br>`+
+    `2. Levantamento de OS em aging >24h<br>`+
+    `3. Reforço de equipe técnica na região<br>`+
+    `4. Acompanhamento diário com checkpoint às 18h<br>`+
+    `5. Meta intermediária: atingir 80% em 7 dias<br><br>`+
+    `Deseja que eu salve este plano no sistema?`;
+  }
+  if(m.includes('fca')){
+    return`O <strong>FCA (Fato, Causa, Ação)</strong> é a metodologia de análise de falhas utilizada:<br><br>`+
+    `📌 <strong>F — Fato:</strong> O que aconteceu? Qual indicador/PSR está fora da meta?<br>`+
+    `🔍 <strong>C — Causa:</strong> Por que aconteceu? Use 5 Porquês ou Ishikawa.<br>`+
+    `✅ <strong>A — Ação:</strong> O que será feito? Com prazo e responsável.<br><br>`+
+    `Temos <strong>${DB.filter(d=>!isOK(d)).length} registros</strong> que requerem FCA. Deseja que eu gere automaticamente os FCAs prioritários?`;
+  }
+  if(m.includes('reparo no prazo 24')){
+    const recs=DB.filter(d=>d.indicador==='Reparo no Prazo 24h');
+    return`Análise completa de <strong>Reparo no Prazo 24h</strong>:<br><br>`+
+    recs.map(d=>`• ${d.psr}·${d.uf}: <strong style="color:${isOK(d)?'var(--green)':'var(--red)'}">${fmt(d.resultado)}</strong> vs meta ${fmt(d.meta)}`).join('<br>')+
+    `<br><br>Nenhuma PSR está atingindo a meta de 90%! Situação crítica generalizada.<br><br>`+
+    `<strong>Causa provável:</strong> Pico sazonal de reparos em março, combinado com capacidade operacional estabilizada.<br><br>`+
+    `<strong>Ação recomendada:</strong> Convocação de equipes extras + priorização imediata de OSs com aging >18h.`;
+  }
+  // default
+  const total=DB.length, okN=DB.filter(isOK).length;
+  return`Com base nos dados de performance de março/2026, temos:<br><br>`+
+  `• <strong>${total}</strong> registros de indicadores<br>`+
+  `• <span style="color:var(--green)">${okN} dentro da meta</span> (${((okN/total)*100).toFixed(0)}%)<br>`+
+  `• <span style="color:var(--red)">${total-okN} fora da meta</span> (${(((total-okN)/total)*100).toFixed(0)}%)<br><br>`+
+  `Posso aprofundar em qualquer indicador, PSR ou gerar planos de ação. Qual análise prefere?`;
+}
+
+// ─── RELATÓRIOS ───────────────────────────────────────
+function initRelatorios(){
+  // Tabela completa
+  const tbody=document.getElementById('relTableBody');
+  if(tbody){
+    tbody.innerHTML=DB.map(d=>{
+      const s=statusOf(d);
+      const gap=(d.regra==='MENOR'?(d.resultado-d.meta):(d.meta-d.resultado));
+      return`<tr>
+        <td style="font-size:11.5px">${d.indicador}</td>
+        <td><span class="badge gray">${d.produto}</span></td>
+        <td>${d.psr}</td><td>${d.uf}</td>
+        <td class="mono">${fmt(d.meta)}</td>
+        <td class="mono" style="font-weight:700;color:${s==='ok'?'var(--green)':s==='bad'?'var(--red)':'var(--amber)'}">${fmt(d.resultado)}</td>
+        <td class="mono" style="color:${gap>0?'var(--red)':'var(--green)'}">${gap>0?'-':'+'}${Math.abs(gap).toFixed(2)}pp</td>
+        <td>${badgeSt(s)}</td>
+      </tr>`;
+    }).join('');
+  }
+  // Charts
+  const inds=[...new Set(DB.map(d=>d.indicador))].slice(0,8);
+  const c=chartColors();
+  if(charts['chartRelInd'])charts['chartRelInd'].destroy();
+  charts['chartRelInd']=new Chart(document.getElementById('chartRelInd'),{type:'bar',
+    data:{labels:inds.map(i=>i.length>20?i.slice(0,20)+'…':i),
+      datasets:[{
+        label:'% Conformidade',
+        data:inds.map(i=>{const r=DB.filter(d=>d.indicador===i);return((r.filter(isOK).length/r.length)*100).toFixed(1);}),
+        backgroundColor:inds.map(i=>{const r=DB.filter(d=>d.indicador===i);const pct=r.filter(isOK).length/r.length;return PB(pct>=0.8?'green':pct>=0.5?'amber':'red');}),
+        borderColor:inds.map(i=>{const r=DB.filter(d=>d.indicador===i);const pct=r.filter(isOK).length/r.length;return P(pct>=0.8?'green':pct>=0.5?'amber':'red');}),
+        borderWidth:1.5,borderRadius:6,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      scales:{
+        x:{ticks:{color:c.tick,font:{size:9.5},maxRotation:35},grid:{display:false},border:{display:false}},
+        y:{ticks:{color:c.tick,font:{size:10},callback:v=>v+'%'},grid:{color:c.grid},border:{display:false},max:100,min:0}
+      },
+      plugins:{legend:{display:false},tooltip:{...chartTooltip(),callbacks:{label:ctx=>' '+ctx.parsed.y+'% de conformidade'}}}}});
+
+  const psrs=['ABILITY','TEL'];
+  if(charts['chartRelPSR'])charts['chartRelPSR'].destroy();
+  charts['chartRelPSR']=new Chart(document.getElementById('chartRelPSR'),{type:'doughnut',
+    data:{labels:psrs,
+      datasets:[{
+        data:psrs.map(p=>{const r=DB.filter(d=>d.psr===p);return((r.filter(isOK).length/r.length)*100).toFixed(1);}),
+        backgroundColor:psrs.map(p=>PB(PSR_COL[p])),
+        borderColor:psrs.map(p=>P(PSR_COL[p])),
+        borderWidth:2,hoverOffset:10,
+        hoverBackgroundColor:psrs.map(p=>P(PSR_COL[p]))
+      }]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
+      plugins:{
+        legend:{display:true,position:'right',labels:{color:c.legend,font:{size:11},boxWidth:8,padding:14,usePointStyle:true,pointStyle:'circle'}},
+        tooltip:{...chartTooltip(),callbacks:{label:ctx=>` ${ctx.label}: ${ctx.parsed}% OK`}}
+      }}});
+}
+
+function switchRelTab(el,id){
+  el.closest('.tabs').querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  ['rel-resumo','rel-psr','rel-produto','rel-exec'].forEach(i=>{
+    const d=document.getElementById(i);if(d)d.style.display=i===id?'block':'none';
+  });
+  if(id==='rel-psr')renderRelPSR();
+  if(id==='rel-produto')renderRelProduto();
+  if(id==='rel-exec')renderRelExec();
+}
+
+function renderRelPSR(){
+  const psrs=['ABILITY','TEL'];
+  document.getElementById('relPSRContent').innerHTML=psrs.map(p=>{
+    const recs=DB.filter(d=>d.psr===p);
+    const okN=recs.filter(isOK).length;
+    return`<div class="card" style="margin-bottom:14px"><div class="card-header"><div class="card-title">${p} — ${okN}/${recs.length} dentro da meta</div></div>
+    <div class="table-wrap"><table><thead><tr><th>Indicador</th><th>UF</th><th>Produto</th><th>Meta</th><th>Resultado</th><th>Status</th></tr></thead>
+    <tbody>${recs.map(d=>`<tr><td style="font-size:11.5px">${d.indicador}</td><td>${d.uf}</td><td><span class="badge gray">${d.produto}</span></td><td class="mono">${fmt(d.meta)}</td><td class="mono" style="color:${isOK(d)?'var(--green)':'var(--red)'};font-weight:700">${fmt(d.resultado)}</td><td>${badgeSt(statusOf(d))}</td></tr>`).join('')}</tbody>
+    </table></div></div>`;
+  }).join('');
+}
+
+function renderRelProduto(){
+  const prods=['FTTH','DADOS','FO'];
+  document.getElementById('relProdutoContent').innerHTML=prods.map(p=>{
+    const recs=DB.filter(d=>d.produto===p);
+    const okN=recs.filter(isOK).length;
+    return`<div class="card" style="margin-bottom:14px"><div class="card-header"><div class="card-title">${p} — ${okN}/${recs.length} dentro da meta</div></div>
+    <div class="table-wrap"><table><thead><tr><th>Indicador</th><th>PSR</th><th>UF</th><th>Meta</th><th>Resultado</th><th>Status</th></tr></thead>
+    <tbody>${recs.map(d=>`<tr><td style="font-size:11.5px">${d.indicador}</td><td>${d.psr}</td><td>${d.uf}</td><td class="mono">${fmt(d.meta)}</td><td class="mono" style="color:${isOK(d)?'var(--green)':'var(--red)'};font-weight:700">${fmt(d.resultado)}</td><td>${badgeSt(statusOf(d))}</td></tr>`).join('')}</tbody>
+    </table></div></div>`;
+  }).join('');
+}
+
+function renderRelExec(){
+  const t=DB.length,ok=DB.filter(isOK).length;
+  document.getElementById('relExecContent').innerHTML=`
+  <div class="kpi-grid" style="margin-bottom:18px">
+    <div class="kpi"><div class="kpi-label">Taxa de Conformidade</div><div class="kpi-value" style="color:${ok/t>0.7?'var(--green)':'var(--red)'}">${((ok/t)*100).toFixed(1)}%</div></div>
+    <div class="kpi"><div class="kpi-label">Indicadores OK</div><div class="kpi-value" style="color:var(--green)">${ok}</div></div>
+    <div class="kpi"><div class="kpi-label">Fora da Meta</div><div class="kpi-value" style="color:var(--red)">${t-ok}</div></div>
+    <div class="kpi"><div class="kpi-label">PSRs Monitoradas</div><div class="kpi-value">3</div></div>
+  </div>
+  <div class="card"><div class="card-header"><div class="card-title">Resumo Executivo — Março 2026</div></div>
+  <div class="table-wrap"><table><thead><tr><th>Indicador-Chave</th><th>Situação</th><th>Impacto</th><th>Recomendação</th></tr></thead>
+  <tbody>
+    <tr><td>Reparo no Prazo 24h</td><td><span class="badge red">5/5 fora da meta</span></td><td>Alto</td><td>Ação imediata — reforço de equipe</td></tr>
+    <tr><td>Repetida 30 dias FO B2B</td><td><span class="badge red">5/5 fora da meta</span></td><td>Alto</td><td>FCA obrigatório por PSR</td></tr>
+    <tr><td>Infância 30 Dias</td><td><span class="badge red">4/5 fora da meta</span></td><td>Médio</td><td>Treinamento e auditoria</td></tr>
+    <tr><td>Instalação no Prazo 96h</td><td><span class="badge amber">2/5 fora da meta</span></td><td>Médio</td><td>Monitoramento diário</td></tr>
+    <tr><td>Disponibilidade FTTH</td><td><span class="badge red">4/5 fora da meta</span></td><td>Crítico</td><td>Verificar NOC e planta imediatamente</td></tr>
+  </tbody></table></div></div>`;
+}
+
+// ─── ALERTAS ─────────────────────────────────────────
+function initAlertas(){
+  const critical=DB.filter(d=>statusOf(d)==='bad').sort((a,b)=>{
+    const ga=a.regra==='MENOR'?(a.resultado-a.meta)/a.meta:(a.meta-a.resultado)/a.meta;
+    const gb=b.regra==='MENOR'?(b.resultado-b.meta)/b.meta:(b.meta-b.resultado)/b.meta;
+    return gb-ga;
+  });
+  document.getElementById('alertasContent').innerHTML=critical.map(d=>`
+    <div class="alert danger">
+      <svg viewBox="0 0 20 20" fill="none" width="15" height="15"><path d="M10 3L2 17h16L10 3z" stroke="currentColor" stroke-width="1.5"/><path d="M10 8v4M10 14h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <div class="alert-text"><strong>${d.indicador}</strong> · ${d.psr} · ${d.uf} — ${fmt(d.resultado)} vs meta ${fmt(d.meta)}
+        <button class="tb-btn" onclick="openFCAModal('${d.psr}','${d.indicador}','${d.resultado}')" style="margin-left:10px;padding:3px 9px;font-size:11px;display:inline-flex">FCA</button>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('alertasTable').innerHTML=critical.map(d=>{
+    const gap=Math.abs(d.regra==='MENOR'?(d.resultado-d.meta):(d.meta-d.resultado));
+    return`<tr>
+      <td style="font-size:11.5px">${d.indicador}</td>
+      <td>${d.psr}</td><td>${d.uf}</td>
+      <td class="mono">${fmt(d.meta)}</td>
+      <td class="mono" style="color:var(--red);font-weight:700">${fmt(d.resultado)}</td>
+      <td class="mono" style="color:var(--red)">-${gap.toFixed(2)}pp</td>
+      <td><span class="badge red">Crítico</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── EXPORTAÇÃO PDF ──────────────────────────────────
+function buildPDFHtml(title, data, extraInfo){
+  const rows = data.map(d=>{
+    const s = statusOf(d);
+    const gap = (d.regra==='MENOR' ? (d.resultado-d.meta) : (d.meta-d.resultado));
+    return `<tr>
+      <td>${d.indicador}</td><td>${d.psr}</td><td>${d.uf}</td><td>${d.produto}</td>
+      <td>${d.meta.toFixed(2)}%</td>
+      <td class="${s}">${d.resultado.toFixed(2)}%</td>
+      <td class="${gap>0?'bad':'ok'}">${gap>0?'▼':'+'}${Math.abs(gap).toFixed(2)}pp</td>
+      <td><span class="badge-${s}">${s==='ok'?'✓ OK':s==='warn'?'⚠ Atenção':'✗ Crítico'}</span></td>
+    </tr>`;
+  }).join('');
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>${title}</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',Arial,sans-serif;padding:28px 32px;color:#1a1a1a;background:#fff;font-size:12px}
+    .header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #f5d000}
+    .header-left h1{font-size:18px;font-weight:700;color:#111;margin-bottom:3px}
+    .header-left .sub{font-size:11px;color:#888}
+    .header-right{text-align:right;font-size:10px;color:#aaa}
+    .info-box{font-size:10.5px;color:#555;margin-bottom:16px;padding:9px 12px;background:#f9f9f6;border-radius:7px;border-left:3px solid #f5d000}
+    .summary{display:flex;gap:16px;margin-bottom:18px}
+    .summary-item{flex:1;padding:10px 14px;border-radius:8px;border:1px solid #eee}
+    .summary-label{font-size:9.5px;text-transform:uppercase;letter-spacing:.4px;color:#888;margin-bottom:3px}
+    .summary-val{font-size:18px;font-weight:700}
+    table{width:100%;border-collapse:collapse;font-size:11px}
+    thead tr{background:#111;color:#f5d000}
+    th{text-align:left;padding:8px 10px;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+    td{padding:7px 10px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
+    tr:nth-child(even) td{background:#fafafa}
+    tr:hover td{background:#fff8e6}
+    .ok{color:#16a34a;font-weight:700}.bad{color:#dc2626;font-weight:700}.warn{color:#b45309;font-weight:700}
+    .badge-ok{background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700;white-space:nowrap}
+    .badge-bad{background:#fee2e2;color:#b91c1c;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700;white-space:nowrap}
+    .badge-warn{background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700;white-space:nowrap}
+    .footer{margin-top:22px;font-size:9.5px;color:#bbb;border-top:1px solid #eee;padding-top:10px;display:flex;justify-content:space-between}
+    @media print{
+      body{padding:14px}
+      .no-print{display:none}
+      tr{page-break-inside:avoid}
+    }
+  </style>
+  </head><body>
+  <div class="header">
+    <div class="header-left">
+      <h1>GQT·RJO · ${title}</h1>
+      <div class="sub">GQT·RJO · FTTH · RJ · Março 2026</div>
+    </div>
+    <div class="header-right">
+      Gerente: André Gomes<br>
+      Gerado em: ${new Date().toLocaleString('pt-BR')}
+    </div>
+  </div>
+  ${extraInfo ? `<div class="info-box">${extraInfo}</div>` : ''}
+  <div class="summary">
+    <div class="summary-item"><div class="summary-label">Total</div><div class="summary-val">${data.length}</div></div>
+    <div class="summary-item" style="border-color:#dcfce7"><div class="summary-label">Dentro da Meta</div><div class="summary-val" style="color:#16a34a">${data.filter(isOK).length}</div></div>
+    <div class="summary-item" style="border-color:#fef3c7"><div class="summary-label">Atenção</div><div class="summary-val" style="color:#b45309">${data.filter(d=>statusOf(d)==='warn').length}</div></div>
+    <div class="summary-item" style="border-color:#fee2e2"><div class="summary-label">Crítico</div><div class="summary-val" style="color:#dc2626">${data.filter(d=>statusOf(d)==='bad').length}</div></div>
+  </div>
+  <table>
+    <thead><tr>
+      <th>Indicador</th><th>PSR</th><th>UF</th><th>Produto</th>
+      <th>Meta</th><th>Resultado</th><th>Desvio</th><th>Status</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="footer">
+    <span>GQT·RJO · Gestão da Qualidade Telecom · ${new Date().getFullYear()}</span>
+    <span>Produto: FTTH · UF: RJ · PSRs: ABILITY, TEL</span>
+  </div>
+  <script>window.onload=function(){window.print()}<\/script>
+  </body></html>`;
+}
+
+function exportPDF(title, sourceId, extraInfo){
+  const data = sourceId === 'pg-indicadores' ? getFilteredDB() : DB;
+  if(!data.length){
+    showToast('Nenhum dado para exportar.');
+    return;
+  }
+  try {
+    const html  = buildPDFHtml(title, data, extraInfo);
+    const blob  = new Blob([html], {type:'text/html;charset=utf-8'});
+    const url   = URL.createObjectURL(blob);
+    const link  = document.createElement('a');
+    link.href   = url;
+    link.target = '_blank';
+    link.rel    = 'noopener';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(()=>URL.revokeObjectURL(url), 30000);
+    showToast('PDF aberto em nova aba — use Ctrl+P para imprimir!');
+  } catch(e){
+    console.error('Erro ao gerar PDF:', e);
+    showToast('Erro ao gerar PDF. Verifique se popups estão permitidos.');
+  }
+}
+
+function getFilteredDB(){
+  const fp=document.getElementById('fProduto')?.value||'';
+  const fPSR=document.getElementById('fPSR')?.value||'';
+  const fUF=document.getElementById('fUF')?.value||'';
+  const fs=document.getElementById('fStatus')?.value||'';
+  return DB.filter(d=>{
+    if(fp&&d.produto!==fp)return false;
+    if(fPSR&&d.psr!==fPSR)return false;
+    if(fUF&&d.uf!==fUF)return false;
+    if(fs==='ok'&&!isOK(d))return false;
+    if(fs==='bad'&&isOK(d))return false;
+    return true;
+  });
+}
+
+function exportIndicadoresPDF(){exportPDF('Indicadores VIP — Mar/2026','pg-indicadores',`Filtros ativos: Produto=${document.getElementById('fProduto')?.value||'Todos'} | PSR=${document.getElementById('fPSR')?.value||'Todas'} | UF=${document.getElementById('fUF')?.value||'Todos'} | Status=${document.getElementById('fStatus')?.value||'Todos'}`);}
+function exportRelPDF(){exportPDF('Relatório de Performance — Mar/2026','pg-relatorios',`Relatório completo de ${DB.length} registros · ${DB.filter(isOK).length} dentro da meta · ${DB.filter(d=>!isOK(d)).length} fora da meta`);}
+function exportPVooPDF(){
+  const data = DB;
+  const days = Array.from({length:31},(_,i)=>i+1);
+  const pvooBlocks = data.map(d=>{
+    const s = statusOf(d);
+    const dayBoxes = days.map(day=>{
+      const st = pvooStatus(d.resultado, d.meta, d.regra, day, 31);
+      const cls = st==='ok'?'ok-day':st==='bad'?'bad-day':st==='proj'?'proj-day':'warn-day';
+      return `<div class="day ${cls}">${day}</div>`;
+    }).join('');
+    return `<div class="pvoo">
+      <div class="pvoo-title">${d.indicador} · ${d.psr} · ${d.uf}</div>
+      <div class="pvoo-meta">Produto: ${d.produto} | Meta: ${d.meta.toFixed(2)}% | Resultado: ${d.resultado.toFixed(2)}% | Status: ${s==='ok'?'✓ OK':s==='warn'?'⚠ Atenção':'✗ Crítico'}</div>
+      <div class="days">${dayBoxes}</div>
+      <div class="legend"><span>■ OK</span><span>■ Atenção</span><span>■ Crítico</span><span>□ Projetado</span></div>
+    </div>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Planos de Voo</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',sans-serif;padding:24px 28px;color:#111;background:#fff;font-size:12px}
+    .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;padding-bottom:12px;border-bottom:2px solid #f5d000}
+    h1{font-size:17px;font-weight:700;margin-bottom:3px}
+    .sub{font-size:11px;color:#888}
+    .hr{text-align:right;font-size:10px;color:#aaa}
+    .pvoo{margin-bottom:18px;padding:12px 14px;border:1px solid #eee;border-radius:8px;page-break-inside:avoid}
+    .pvoo-title{font-size:12.5px;font-weight:700;margin-bottom:4px}
+    .pvoo-meta{font-size:10.5px;color:#666;margin-bottom:8px}
+    .days{display:flex;gap:3px;flex-wrap:wrap}
+    .day{width:24px;height:24px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:700}
+    .ok-day{background:#dcfce7;color:#15803d}
+    .bad-day{background:#fee2e2;color:#b91c1c}
+    .warn-day{background:#fef3c7;color:#92400e}
+    .proj-day{background:#f5f5f2;color:#aaa;border:1px dashed #ddd}
+    .legend{display:flex;gap:12px;font-size:9.5px;color:#888;margin-top:7px}
+    .footer{margin-top:18px;font-size:9.5px;color:#bbb;border-top:1px solid #eee;padding-top:10px;display:flex;justify-content:space-between}
+    @media print{body{padding:12px}.pvoo{page-break-inside:avoid}}
+  </style>
+  </head><body>
+  <div class="header">
+    <div><h1>GQT·RJO · Planos de Voo — Março 2026</h1><div class="sub">GQT·RJO · Produto: FTTH · UF: RJ</div></div>
+    <div class="hr">Gerente: André Gomes<br>Gerado em: ${new Date().toLocaleString('pt-BR')}</div>
+  </div>
+  ${pvooBlocks}
+  <div class="footer">
+    <span>GQT·RJO · Gestão da Qualidade Telecom · ${new Date().getFullYear()}</span>
+    <span>FTTH · RJ · PSRs: ABILITY, TEL</span>
+  </div>
+  <script>window.onload=function(){window.print()}<\/script>
+  </body></html>`;
+
+  try {
+    const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+    const url  = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url; link.target = '_blank'; link.rel = 'noopener';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(()=>URL.revokeObjectURL(url), 30000);
+    showToast('Planos de Voo abertos — use Ctrl+P para imprimir!');
+  } catch(e){
+    showToast('Erro ao gerar PDF. Tente novamente.');
+  }
+}
+
+// ─── THEME ────────────────────────────────────────────
+function toggleTheme(){
+  const isLight=document.body.classList.toggle('light');
+  const moon=`<svg viewBox="0 0 20 20" fill="none" width="14" height="14"><path d="M17.5 11.5A7.5 7.5 0 118.5 2.5a5.5 5.5 0 009 9z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
+  const sun=`<svg viewBox="0 0 20 20" fill="none" width="14" height="14"><circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+  document.getElementById('themeIco').outerHTML=isLight?moon.replace('viewBox','id="themeIco" viewBox'):sun.replace('viewBox','id="themeIco" viewBox');
+  document.getElementById('topThemeIco').outerHTML=isLight?moon.replace('viewBox','id="topThemeIco" viewBox'):sun.replace('viewBox','id="topThemeIco" viewBox');
+  document.getElementById('themeLabel').textContent=isLight?'Modo Escuro':'Modo Claro';
+  // Rebuild visible charts
+  const active=document.querySelector('.page.active');
+  if(active)setTimeout(()=>initPage(active.id.replace('pg-','')),50);
+}
+
+// ─── SEARCH ──────────────────────────────────────────
+function doSearch(q){
+  if(!q){return;}
+  if(q.length<2)return;
+  const found=DB.filter(d=>d.indicador.toLowerCase().includes(q.toLowerCase())||d.psr.toLowerCase().includes(q.toLowerCase())||d.uf.toLowerCase().includes(q.toLowerCase()));
+  if(found.length){
+    showPage('indicadores');
+    setTimeout(()=>{
+      document.getElementById('fProduto').value='';
+      document.getElementById('fPSR').value='';
+      document.getElementById('fUF').value='';
+      document.getElementById('fStatus').value='';
+      document.getElementById('indTable').innerHTML=found.map(d=>`
+        <div class="ind-row" onclick="openVipDetail(${JSON.stringify(d).replace(/"/g,'&quot;')})">
+          <div><span style="font-size:12px;font-weight:600">${d.indicador}</span><br><span style="font-size:10.5px;color:var(--text3)">${d.psr} · ${d.uf}</span></div>
+          <div><span class="badge gray">${d.produto}</span></div>
+          <div class="mono">${fmt(d.meta)}</div>
+          <div class="mono" style="font-weight:700;color:${statusOf(d)==='ok'?'var(--green)':statusOf(d)==='warn'?'var(--amber)':'var(--red)'}">${fmt(d.resultado)}</div>
+          <div>${badgeSt(statusOf(d))}</div>
+        </div>`).join('');
+      document.getElementById('indKPIs').innerHTML=`<div class="kpi"><div class="kpi-label">Resultados</div><div class="kpi-value">${found.length}</div></div>`;
+    },80);
+  }
+}
+
+// ─── TOAST ───────────────────────────────────────────
+function showToast(msg){
+  const t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:24px;right:24px;background:var(--accent);color:#000;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.3);animation:fadeIn .2s ease';
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),3000);
+}
+
+// ─── INIT ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  initHome();
+  document.getElementById('alertBadge').textContent=DB.filter(d=>statusOf(d)==='bad').length;
+});
+</script>
+</body>
+</html>
